@@ -24,6 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: kelomi44/backend-app:latest
     container_name: backend_container
     restart: unless-stopped
     ports:
@@ -50,6 +51,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: kelomi44/frontend-app:latest
     container_name: frontend_container
     restart: unless-stopped
     ports:

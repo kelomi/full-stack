@@ -1,0 +1,62 @@
+name: Deploy Frontend App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build frontend docker image
+        run: docker build -t kelomi44/frontend-app:${{ github.sha }} -t kelomi44/frontend-app:latest ./frontend
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Push frontend docker image to DockerHub
+        run: |
+          docker push kelomi44/frontend-app:${{ github.sha }}
+          docker push kelomi44/frontend-app:latest
+      
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_PRIVATE_KEY }}
+      
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=30 \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Navigate to application directory
+            cd /home/userapp
+            
+            # Update docker-compose.yml with new image tag
+            sed -i "s|kelomi44/frontend-app:.*|kelomi44/frontend-app:${{ github.sha }}|" docker-compose.yml
+            
+            # Pull the latest Docker images
+            docker compose pull frontend
+            
+            # Recreate and start containers
+            docker compose up -d --force-recreate
+            
+            # Check container status
+            docker compose ps
+            
+            # Clean up unused images
+            docker image prune -af
+            
+            # Verify deployment
+            echo "Deployment completed successfully!"
+          EOF
