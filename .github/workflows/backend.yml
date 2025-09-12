@@ -1,12 +1,14 @@
-name: Deploy backend App to EC2
+name: Deploy Backend App to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
 
 jobs:
-  build-and-deploy-frontend:
+  build-and-deploy-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -16,7 +18,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       
       - name: Build backend docker image
-        run: docker build -t kelomi44/backend-app:${{ github.sha }} -t kelomi44/backend-app:latest ./frontend
+        run: docker build -t kelomi44/backend-app:${{ github.sha }} -t kelomi44/backend-app:latest ./backend
       
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -32,31 +34,25 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.EC2_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
       
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no \
               -o ServerAliveInterval=30 \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Navigate to application directory
             cd /home/userapp
             
-            # Update docker-compose.yml with new image tag
+            # Update backend image tag
             sed -i "s|kelomi44/backend-app:.*|kelomi44/backend-app:${{ github.sha }}|" docker-compose.yml
             
-            # Pull the latest Docker images
+            # Pull and restart backend only
             docker compose pull backend
+            docker compose up -d backend
             
-            # Recreate and start containers
-            docker compose up -d --force-recreate
-            
-            # Check container status
+            # Wait for backend to be healthy
+            sleep 10
             docker compose ps
             
-            # Clean up unused images
-            docker image prune -af
-            
-            # Verify deployment
-            echo "Deployment completed successfully!"
+            echo "Backend deployment completed!"
           EOF
