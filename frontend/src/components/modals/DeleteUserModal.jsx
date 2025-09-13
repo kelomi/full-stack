@@ -24,7 +24,7 @@ function DeleteUserModal() {
       // ✅ FIXED: Direct API URL instead of environment variable
       const res = await axios.request({
         method: "delete",
-        url: 'http://34.228.60.70:3000/api/',
+        url: 'http://34.226.197.231:3000/api/',
         data: { id }
       });
 
