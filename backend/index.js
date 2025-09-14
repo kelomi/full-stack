@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware - FIXED CORS CONFIGURATION
 app.use(cors({
-  origin: 'http://54.165.24.0:5000', // Your frontend URL
+  origin: 'http://52.90.222.44:5000', // Your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -54,7 +54,7 @@ let pool;
 
         // Start the server
         app.listen(port, () => {
-            console.log(`🚀 Server running on port http://54.165.24.0:${port}`);
+            console.log(`🚀 Server running on port http://52.90.222.44:${port}`);
         });
 
     } catch (error) {
