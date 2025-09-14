@@ -30,7 +30,7 @@ jobs:
         context: ./backend
         file: ./backend/Dockerfile
         push: true
-        tags: kelomi44/backend-app:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend-app:latest  # Fixed: Use secret instead of hardcoded
 
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.10
@@ -46,9 +46,9 @@ jobs:
           docker stop backend_container || true
           docker rm backend_container || true
           
-          # Create or update backend container
+          # Create or update backend container WITH LINK TO MYSQL
           docker run -d \
-            --name backend_container \
+            --name backend \
             --restart unless-stopped \
             -p 3000:3000 \
             -e DB_HOST=mysql_container \
@@ -56,6 +56,7 @@ jobs:
             -e DB_USER=root \
             -e DB_PASSWORD=edoRor@44 \
             -e DB_DATABASE=crud_operations \
+            --link mysql_container:mysql \  # ← CRITICAL: ADD THIS LINE
             ${{ secrets.DOCKERHUB_USERNAME }}/backend-app:latest
           
           # Clean up unused images

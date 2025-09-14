@@ -29,7 +29,7 @@ function CreateUserModal({ addUser }) {
 
     try {
       // ✅ FIXED: Direct API URL instead of environment variable
-      const res = await axios.post('http://18.209.18.152:3000/api/', {
+      const res = await axios.post('http://52.90.249.200:3000/api/', {
         name,
         email
       });
