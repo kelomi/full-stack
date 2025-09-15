@@ -156,7 +156,7 @@ pm2 restart react-app
 ### 9. Optional: Setup PM2 to Start on Boot 🧹
 ```bash
 # Run this command to generate startup script:
-pm2 startup
+pm2 startup 
 # Then follow the instruction printed in the terminal (copy & paste the provided command).
 
 # Finally save current processes:
