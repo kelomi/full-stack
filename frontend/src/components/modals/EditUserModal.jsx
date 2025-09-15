@@ -34,7 +34,7 @@ function EditUserModal() {
     }
     try {
       // ✅ FIXED: Direct API URL instead of environment variable
-      const res = await axios.put('http://52.90.249.200:3000/api/', {
+      const res = await axios.put('http://54.88.109.73:3000/api/', {
         id,
         name,
         email

@@ -17,7 +17,7 @@ function Table() {
     const fetchUsers = async () => {
       try {
         // ✅ FIXED: Use direct API URL instead of environment variable
-        const response = await axios.get('http://52.90.249.200:3000/api/');
+        const response = await axios.get('http://54.88.109.73:3000/api/');
         
         //setting the empty array as a json object of users got from the server
         setUsers(response.data);

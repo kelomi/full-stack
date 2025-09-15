@@ -2,7 +2,7 @@ name: Deploy Frontend to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend.yml'
@@ -30,7 +30,7 @@ jobs:
         context: ./frontend
         file: ./frontend/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest  # Fixed: Use secret
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest
 
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.10
@@ -39,20 +39,8 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Pull the latest frontend image
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest
-          
-          # Stop and remove existing frontend container if running
           docker stop frontend_container || true
           docker rm frontend_container || true
-          
-          # Create or update frontend container WITH LINK TO BACKEND
-          docker run -d \
-            --name frontend_container \  # Keep consistent name
-            --restart unless-stopped \
-            -p 5000:80 \
-            --link backend:backend \  # ← CRITICAL: Add this link
-            ${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest
-          
-          # Clean up unused images
+          docker run -d --name frontend_container --restart unless-stopped -p 5000:80 --network my-app-network ${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest
           docker image prune -af
